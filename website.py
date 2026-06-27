@@ -1441,7 +1441,7 @@ def main():
         print("ERROR: 0 points had physical direction keys.")
         return
 
-    # Write site data (separate file -> faster / lighter HTML)
+    # Write site data 
     site_data_dir = os.path.join(out_dir, args.site_data_prefix)
     ensure_dir(site_data_dir)
     points_path = os.path.join(site_data_dir, "points.json")
