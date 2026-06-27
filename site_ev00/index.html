@@ -392,7 +392,6 @@ async function tryFetchJson(urls){
   return null;
 }
 
-// robust basename candidates so plots show even if IDs differ slightly
 function arrowCandidates(d){
   const out = [];
   const pid = d.painting_id ?? "";
@@ -730,7 +729,7 @@ function buildIndices() {
 }
 
 function normalizeAndFlip() {
-  // ensure numeric rank for filtering + numeric idx for click lookup
+  // ensure numeric rank for filtering and numeric idx for click lookup
   dataAll.forEach(d => {
     d.rank = (d.rank == null) ? null : Number(d.rank);
     d.idx  = Number(d.idx);
