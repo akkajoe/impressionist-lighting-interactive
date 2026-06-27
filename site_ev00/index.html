@@ -653,7 +653,7 @@ function bindPlotClickHandler(){
         showDetailsBundle(d);
         showRightPanel('2d');
       } finally {
-        clickBusy = false;
+        setTimeout(() => { clickBusy = false; }, 400);
       }
     });
   });
