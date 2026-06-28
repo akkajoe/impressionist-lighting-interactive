@@ -17,7 +17,7 @@ Available at [URL removed for anonymous review].
 - `balls/`: synthesized chrome ball images
 - `plots_embedded/`: per-painting light direction arrow plots
 - `site_data/`: points.json containing the full collection of directional estimates
-- `multi_ransac_summary_people.csv` — derived lighting measurements
+- `multi_ransac_summary_people.csv`: derived lighting measurements
 - `website.py`: script used to generate the site from pipeline outputs
 
 ## Usage
