@@ -6,6 +6,10 @@ Interactive 3D visualization of estimated light directions across 1,394 Impressi
 
 Available at [URL removed for anonymous review].
 
+## Data
+
+`multi_ransac_summary_people.csv` contains the full set of derived lighting measurements used in the paper, including estimated light direction, elevation, azimuth, inlier fraction, and mean angular error for each painting across three exposure values.
+
 ## Structure
 
 - `site_ev00/`: the interactive site (index.html and supporting files)
@@ -13,6 +17,7 @@ Available at [URL removed for anonymous review].
 - `balls/`: synthesized chrome ball images
 - `plots_embedded/`: per-painting light direction arrow plots
 - `site_data/`: points.json containing the full collection of directional estimates
+- `multi_ransac_summary_people.csv` — derived lighting measurements
 - `website.py`: script used to generate the site from pipeline outputs
 
 ## Usage
