@@ -185,7 +185,6 @@ function angleDegBetween(a, b){
   return Math.acos(dot) * 180.0 / Math.PI;
 }
 
-// deterministic color
 function hashString(str) {
   let h = 2166136261;
   for (let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
@@ -230,14 +229,12 @@ const baseLayout = {
   paper_bgcolor: '#ffffff',
   plot_bgcolor: '#ffffff',
   showlegend: false,
-  // helps reduce hover work
   hovermode: false
 };
 const config = { responsive: true, displayModeBar: false, displaylogo: false };
 
-function pointSize() { return 3.6; } // unchanged
+function pointSize() { return 3.6; }
 
-// highlight
 const HILITE_NAME = '__selected__';
 function highlightTrace() {
   return {
@@ -313,11 +310,8 @@ function makeTrace(points, rank, opacity) {
       line: { color: 'rgba(255,255,255,0.6)', width: 0.5 }
     },
     customdata: pts.map(d => d.idx),
-
-    // key part:
     hoverinfo: 'none',
     hovertemplate: '<extra></extra>',
-
     showlegend: false
   };
 }
@@ -382,24 +376,25 @@ function showRightPanel(mode){
   b3.classList.toggle('active', rightPanelMode === '3d');
 }
 
-async function tryFetchJson(urls){
-  for (const url of urls){
+async function tryFetchJson(urls, signal) {
+  for (const url of urls) {
     try {
-      const resp = await fetch(url);
+      const resp = await fetch(url, signal ? { signal } : {});
       if (resp && resp.ok) return { url, payload: await resp.json() };
-    } catch(e) {}
+    } catch(e) {
+      if (e.name === 'AbortError') throw e;
+    }
   }
   return null;
 }
 
-// robust basename candidates so plots show even if IDs differ slightly
 function arrowCandidates(d){
   const out = [];
   const pid = d.painting_id ?? "";
   const rid = d.rank_id ?? "";
   const img = d.img_file ?? "";
 
-  const baseImg = img.replace(/\.[^.]+$/, ""); // strip ext
+  const baseImg = img.replace(/\.[^.]+$/, "");
   out.push(safeFilename(pid));
   out.push(safeFilename(rid));
   out.push(safeFilename(baseImg));
@@ -407,7 +402,13 @@ function arrowCandidates(d){
   return Array.from(new Set(out.filter(s => s && s !== "untitled")));
 }
 
+let arrowFetchController = null;
+
 async function loadArrowPlot3D(d) {
+  if (arrowFetchController) arrowFetchController.abort();
+  arrowFetchController = new AbortController();
+  const signal = arrowFetchController.signal;
+
   const plotDiv2 = document.getElementById('arrowPlot');
   if (!plotDiv2) return;
 
@@ -415,12 +416,19 @@ async function loadArrowPlot3D(d) {
   const candidates = arrowCandidates(d);
 
   const urls = [];
-  for (const c of candidates){
+  for (const c of candidates) {
     urls.push(encodeURI(baseUrl + "/" + c + ".plot.json"));
   }
 
   plotDiv2.innerHTML = "";
-  const got = await tryFetchJson(urls);
+  let got;
+  try {
+    got = await tryFetchJson(urls, signal);
+  } catch(e) {
+    if (e.name === 'AbortError') return;
+    got = null;
+  }
+  if (signal.aborted) return;
 
   if (!got) {
     plotDiv2.innerHTML = `<div style="padding:12px; color:#b91c1c; font-weight:700;">
@@ -464,7 +472,7 @@ function render3DPanel(d){
 
     <div style="margin-top:14px; font-weight:800; color:#111827; font-size:20px;">Chrome balls (ev-00 / ev-25 / ev-50)</div>
     <div style="font-size:12px; color:#6b7280; margin-top:6px;">
-      Loaded from <b>${escapeHtml(BALLS_PREFIX)}/</b> trying raw and sanitized filenames.
+      Loaded from <b>${escapeHtml(BALLS_PREFIX)}/</b> trying raw filenames.
     </div>
 
     <div class="ball-stack" id="ballStack"></div>
@@ -625,7 +633,6 @@ window.jumpToPainting = function(pid){
   showDetailsBundle(rep);
 };
 
-// Plotly click binding (with tiny guard to avoid double-fire)
 let clickBusy = false;
 function bindPlotClickHandler(){
   try { plotDiv.removeAllListeners('plotly_click'); } catch(e) {}
@@ -646,13 +653,18 @@ function bindPlotClickHandler(){
         showDetailsBundle(d);
         showRightPanel('2d');
       } finally {
-        clickBusy = false;
+        setTimeout(() => { clickBusy = false; }, 400);
       }
     });
   });
 }
 
+let _filterTimer = null;
 function applyFilters() {
+  clearTimeout(_filterTimer);
+  _filterTimer = setTimeout(_applyFilters, 80);
+}
+function _applyFilters() {
   const a = artistSelect.value;
   const g = genreSelect.value;
   const q = searchBox.value.trim().toLowerCase();
@@ -730,7 +742,6 @@ function buildIndices() {
 }
 
 function normalizeAndFlip() {
-  // ensure numeric rank for filtering + numeric idx for click lookup
   dataAll.forEach(d => {
     d.rank = (d.rank == null) ? null : Number(d.rank);
     d.idx  = Number(d.idx);
