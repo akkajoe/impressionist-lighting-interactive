@@ -12,7 +12,7 @@ Available at [URL removed for anonymous review].
 - `data/`: painting images
 - `balls/`: synthesized chrome ball images
 - `plots_embedded/`: per-painting light direction arrow plots
-- `site_data/`: points.json containing the full corpus of directional estimates
+- `site_data/`: points.json containing the full collection of directional estimates
 - `website.py`: script used to generate the site from pipeline outputs
 
 ## Usage
